@@ -1,0 +1,33 @@
+# Ignore real environment files
+
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Allow safe example environment files
+
+!.env.example
+!**/.env.example
+
+# Dependencies
+
+node_modules/
+**/node_modules/
+
+# Logs
+
+*.log
+npm-debug.log*
+
+# Build output
+
+dist/
+build/
+
+# Operating system files
+
+.DS_Store
+Thumbs.db
+
+
