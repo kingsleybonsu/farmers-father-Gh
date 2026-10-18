@@ -42,7 +42,7 @@ app.use((err, req, res, next) => {
 });
 
 // Environment Configuration
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI;
 
 if (!MONGO_URI) {
