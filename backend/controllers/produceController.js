@@ -65,7 +65,7 @@ exports.createProduce = async (req, res, next) => {
   let uploadedImage;
 
   try {
-    const { name, category, quantity, price, location } = req.body;
+    const { name, category, quantity, unit, price, location } = req.body;
     let imageUrl = "";
     let imagePublicId = "";
 
@@ -98,6 +98,7 @@ exports.createProduce = async (req, res, next) => {
       name,
       category,
       quantity,
+      unit,
       price,
       location,
       imageUrl,
@@ -179,6 +180,7 @@ exports.getAllProduce = async (req, res, next) => {
                     name: "$name",
                     category: "$category",
                     quantity: "$quantity",
+                    unit: "$unit",
                     price: "$price",
                     location: "$location",
                     imageUrl: "$imageUrl",
@@ -311,7 +313,7 @@ exports.getFarmerProduce = async (req, res, next) => {
       .sort({ createdAt: -1, _id: 1 })
       .skip((page - 1) * PRODUCE_PER_PAGE)
       .limit(PRODUCE_PER_PAGE)
-      .select("name category quantity price location imageUrl createdAt")
+      .select("name category quantity unit price location imageUrl createdAt")
       .lean();
 
     res.json({
@@ -381,10 +383,10 @@ exports.updateProduce = async (req, res, next) => {
       return res.json(listing);
     }
 
-    const { name, category, quantity, price, location } = req.body;
+    const { name, category, quantity, unit, price, location } = req.body;
     const produce = await Produce.findOneAndUpdate(
       { _id: req.params.id, farmer: req.farmer._id },
-      { name, category, quantity, price, location },
+      { name, category, quantity, unit, price, location },
       { new: true, runValidators: true },
     );
 

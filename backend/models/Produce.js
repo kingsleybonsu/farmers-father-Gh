@@ -17,6 +17,13 @@ const produceSchema = new mongoose.Schema(
       enum: ["Fruits", "Vegetables", "Grains", "Tubers", "Livestock"],
     },
     quantity: { type: Number, required: true },
+    unit: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "unit",
+      maxlength: 30,
+    },
     price: { type: Number, required: true },
     location: { type: String, required: true },
     imageUrl: { type: String, default: "" },

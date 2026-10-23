@@ -401,6 +401,12 @@ button {
   font-weight: 600;
 }
 
+.stat-card .stat-quantity-total {
+  font-size: 1.05rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .dashboard-listings {
   display: grid;
   gap: 0.7rem;
@@ -1028,6 +1034,46 @@ button:focus {
 .farmer-produce-meta strong {
   color: var(--primary);
   font-size: 0.98rem;
+}
+
+@media (max-width: 480px) {
+  .farmer-produce-item {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.65rem;
+    row-gap: 0.35rem;
+  }
+
+  .farmer-produce-item .marketplace-produce-image {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .farmer-produce-item .farmer-product-name-block {
+    grid-column: 2;
+  }
+
+  .farmer-produce-item .farmer-produce-meta {
+    display: flex;
+    grid-column: 2;
+    flex-wrap: wrap;
+    justify-items: initial;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 0.25rem 0.65rem;
+    min-width: 0;
+  }
+
+  .farmer-produce-item .farmer-produce-meta span,
+  .farmer-produce-item .farmer-produce-meta strong {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .farmer-produce-item .farmer-produce-meta strong {
+    font-size: 0.88rem;
+  }
 }
 
 .farmer-more-link,

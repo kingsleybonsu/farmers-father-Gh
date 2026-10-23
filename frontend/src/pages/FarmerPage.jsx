@@ -116,8 +116,8 @@ function FarmerPage() {
                     <span className="farmer-produce-location">{item.location}</span>
                   </div>
                   <div className="farmer-produce-meta">
-                    <span>{item.quantity} units</span>
-                    <strong>₵{Number(item.price).toFixed(2)}</strong>
+                    <span>{item.quantity} {item.unit || 'unit'}</span>
+                    <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
                   </div>
                 </article>
               ))}

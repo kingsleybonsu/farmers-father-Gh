@@ -68,7 +68,7 @@ function Dashboard() {
     setError('');
     setMessage('');
     setEditingId(item._id);
-    setDraft({ name: item.name, category: item.category, quantity: item.quantity, price: item.price, location: item.location });
+    setDraft({ name: item.name, category: item.category, quantity: item.quantity, unit: item.unit || 'unit', price: item.price, location: item.location });
   };
 
   const cancelEditing = () => {
@@ -172,7 +172,12 @@ function Dashboard() {
     }
   };
 
-  const totalQuantity = produce.reduce((total, item) => total + Number(item.quantity), 0);
+  const quantityByUnit = produce.reduce((totals, item) => {
+    const unit = (item.unit || 'unit').trim().toLowerCase();
+    totals.set(unit, (totals.get(unit) || 0) + Number(item.quantity));
+    return totals;
+  }, new Map());
+  const quantitySummary = Array.from(quantityByUnit, ([unit, quantity]) => `${quantity} ${unit}`).join(' · ');
   const estimatedValue = produce.reduce((total, item) => total + Number(item.quantity) * Number(item.price), 0);
   const filteredProduce = produce.filter((item) => {
     const selectedFilter = produceFilters.find((filter) => filter.id === categoryFilter);
@@ -196,7 +201,7 @@ function Dashboard() {
       </div>
       <div className="dashboard-stats">
         <div className="stat-card"><span>Total listings</span><strong>{produce.length}</strong></div>
-        <div className="stat-card"><span>Total quantity</span><strong>{totalQuantity} <small>units</small></strong></div>
+        <div className="stat-card"><span>Total quantity</span><strong className="stat-quantity-total">{quantitySummary || '0'}</strong></div>
         <div className="stat-card"><span>Estimated value</span><strong>₵{estimatedValue.toFixed(2)}</strong></div>
       </div>
       {error && <div className="form-error">{error}</div>}
@@ -232,14 +237,15 @@ function Dashboard() {
               <div className="produce-row-title"><div className="produce-icon">✿</div><div><input className="inline-name" name="name" value={draft.name} onChange={handleDraftChange} required /><span className="stock-badge">Editing</span></div></div>
               <label>Category<select name="category" value={draft.category} onChange={handleDraftChange}><option>Fruits</option><option>Vegetables</option><option>Grains</option><option>Tubers</option><option>Livestock</option></select></label>
               <label>Quantity<input name="quantity" type="number" min="1" value={draft.quantity} onChange={handleDraftChange} required /></label>
+              <label>Unit<input name="unit" value={draft.unit} onChange={handleDraftChange} maxLength={30} required /></label>
               <label>Price (₵)<input name="price" type="number" min="0" step="0.01" value={draft.price} onChange={handleDraftChange} required /></label>
               <label>Location<input name="location" value={draft.location} onChange={handleDraftChange} required /></label>
               <div className="row-actions"><button type="button" className="secondary-button compact-button" onClick={cancelEditing}>Undo</button><button type="submit" className="primary-button compact-button" disabled={savingId === item._id}>{savingId === item._id ? 'Saving...' : 'Save changes'}</button></div>
             </form>
           ) : (
             <article key={item._id} className="produce-row">
-              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} units</p></div><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div>
-              <strong className="row-price">₵{Number(item.price).toFixed(2)}</strong>
+              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} {item.unit || 'unit'}</p></div><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div>
+              <strong className="row-price">₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
               <div className="row-actions"><button type="button" className="icon-button" onClick={() => startEditing(item)} aria-label={`Edit ${item.name}`}>Edit</button><button type="button" className="icon-button" onClick={() => openImageEditor(item)} aria-label={`Change image for ${item.name}`}>Edit image</button><button type="button" className="icon-button delete-button" onClick={() => deleteListing(item._id)} disabled={deletingId === item._id} aria-label={`Delete ${item.name}`}>{deletingId === item._id ? '...' : 'Delete'}</button></div>
             </article>
           ))

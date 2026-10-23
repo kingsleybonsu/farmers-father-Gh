@@ -10,6 +10,7 @@ function SellProduce() {
     name: '',
     category: 'Fruits',
     quantity: '',
+    unit: '',
     price: '',
     location: '',
   });
@@ -75,13 +76,14 @@ function SellProduce() {
       listing.append('name', formData.name);
       listing.append('category', formData.category);
       listing.append('quantity', String(Number(formData.quantity)));
+      listing.append('unit', formData.unit.trim());
       listing.append('price', String(Number(formData.price)));
       listing.append('location', formData.location);
       if (imageFile) listing.append('image', imageFile);
 
       await api.post('/produce', listing);
       setMessage('Produce listed successfully.');
-      setFormData({ name: '', category: 'Fruits', quantity: '', price: '', location: '' });
+      setFormData({ name: '', category: 'Fruits', quantity: '', unit: '', price: '', location: '' });
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
@@ -111,13 +113,24 @@ function SellProduce() {
           </select>
         </label>
         <label>
-          units/quantity/pieces
+          Quantity
           <input
             name="quantity"
             type="number"
             min="1"
             value={formData.quantity}
             onChange={handleChange}
+            required
+          />
+        </label>
+        <label>
+          Unit of measurement
+          <input
+            name="unit"
+            value={formData.unit}
+            onChange={handleChange}
+            placeholder="e.g. kg, basket, bag, crate, animal"
+            maxLength={30}
             required
           />
         </label>
