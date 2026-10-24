@@ -3,9 +3,6 @@ import { NavLink } from 'react-router-dom';
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: '▦' },
   { label: 'My produce', path: '/produce', icon: '✿' },
-  { label: 'Orders', path: '/orders', icon: '▤' },
-  { label: 'Sales', path: '/sales', icon: '↗' },
-  { label: 'Messages', path: '/messages', icon: '✉' },
   { label: 'Profile', path: '/profile', icon: '♙' },
   { label: 'Settings', path: '/settings', icon: '⚙' },
 ];

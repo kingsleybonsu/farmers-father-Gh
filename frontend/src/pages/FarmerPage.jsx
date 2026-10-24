@@ -10,6 +10,12 @@ const avatarStyles = {
   farm: { symbol: '🚜', color: '#fff0d5' },
 };
 
+const produceStatusLabels = {
+  available: 'Available',
+  sold_out: 'Sold out',
+  coming_soon: 'Coming soon',
+};
+
 function FarmerPage() {
   const { farmerId } = useParams();
   const [farmer, setFarmer] = useState(null);
@@ -98,7 +104,7 @@ function FarmerPage() {
           {produce.length ? (
             <div className="farmer-detail-produce-list">
               {produce.map((item) => (
-                <article key={item._id} className="farmer-produce-item">
+                <article key={item._id} className={`farmer-produce-item${item.status === 'sold_out' ? ' sold-out' : ''}`}>
                   <div className="marketplace-produce-image">
                     <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
                     {item.imageUrl && (
@@ -116,6 +122,7 @@ function FarmerPage() {
                     <span className="farmer-produce-location">{item.location}</span>
                   </div>
                   <div className="farmer-produce-meta">
+                    <span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span>
                     <span>{item.quantity} {item.unit || 'unit'}</span>
                     <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
                   </div>

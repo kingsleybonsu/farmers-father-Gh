@@ -44,9 +44,6 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle })
               {moreOpen && (
                 <div className="nav-dropdown-menu">
                   <Link to="/produce" onClick={closeMoreMenu}>My produce</Link>
-                  <Link to="/orders" onClick={closeMoreMenu}>Orders</Link>
-                  <Link to="/sales" onClick={closeMoreMenu}>Sales</Link>
-                  <Link to="/messages" onClick={closeMoreMenu}>Messages</Link>
                   <Link to="/profile" onClick={closeMoreMenu}>Profile</Link>
                   <Link to="/settings" onClick={closeMoreMenu}>Settings</Link>
                 </div>
@@ -65,7 +62,7 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle })
         )}
       </nav>
 
-      <HamburgerMenu isAuthenticated={isAuthenticated} farmName={farmerName} onLogout={onLogout} theme={theme} onThemeToggle={onThemeToggle} />
+      <HamburgerMenu isAuthenticated={isAuthenticated} farmerName={farmerName} onLogout={onLogout} theme={theme} onThemeToggle={onThemeToggle} />
     </header>
   );
 }

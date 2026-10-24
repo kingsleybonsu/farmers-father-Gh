@@ -3,10 +3,17 @@ const bcrypt = require("bcryptjs");
 
 const farmerSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    farmName: { type: String, required: true },
-    phone: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    name: { type: String, required: true, trim: true, maxlength: 60 },
+    farmName: { type: String, required: true, trim: true, maxlength: 60 },
+    phone: { type: String, required: true, trim: true },
+    location: { type: String, trim: true, maxlength: 60 },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true },
     avatarStyle: { type: String, default: "neutral" },
   },

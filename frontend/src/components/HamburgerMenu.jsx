@@ -30,9 +30,6 @@ function HamburgerMenu({ isAuthenticated, farmerName, onLogout, theme, onThemeTo
                 Dashboard
               </Link>
               <Link to="/produce" onClick={() => setOpen(false)}>My produce</Link>
-              <Link to="/orders" onClick={() => setOpen(false)}>Orders</Link>
-              <Link to="/sales" onClick={() => setOpen(false)}>Sales</Link>
-              <Link to="/messages" onClick={() => setOpen(false)}>Messages</Link>
               <Link to="/profile" onClick={() => setOpen(false)}>Profile</Link>
               <Link to="/settings" onClick={() => setOpen(false)}>Settings</Link>
               <button className="nav-button mobile-logout" onClick={onLogout}>

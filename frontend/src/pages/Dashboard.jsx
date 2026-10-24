@@ -17,6 +17,12 @@ const produceFilters = [
   { id: 'Livestock', label: 'Livestock', categories: ['Livestock'] },
 ];
 
+const produceStatusLabels = {
+  available: 'Available',
+  sold_out: 'Sold out',
+  coming_soon: 'Coming soon',
+};
+
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const permittedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -68,7 +74,7 @@ function Dashboard() {
     setError('');
     setMessage('');
     setEditingId(item._id);
-    setDraft({ name: item.name, category: item.category, quantity: item.quantity, unit: item.unit || 'unit', price: item.price, location: item.location });
+    setDraft({ name: item.name, category: item.category, status: item.status || 'available', quantity: item.quantity, unit: item.unit || 'unit', price: item.price, location: item.location });
   };
 
   const cancelEditing = () => {
@@ -236,6 +242,7 @@ function Dashboard() {
             <form key={item._id} className="produce-row produce-row-edit" onSubmit={(event) => { event.preventDefault(); saveChanges(item._id); }}>
               <div className="produce-row-title"><div className="produce-icon">✿</div><div><input className="inline-name" name="name" value={draft.name} onChange={handleDraftChange} required /><span className="stock-badge">Editing</span></div></div>
               <label>Category<select name="category" value={draft.category} onChange={handleDraftChange}><option>Fruits</option><option>Vegetables</option><option>Grains</option><option>Tubers</option><option>Livestock</option></select></label>
+              <label>Availability<select name="status" value={draft.status} onChange={handleDraftChange}><option value="available">Available</option><option value="sold_out">Sold out</option><option value="coming_soon">Coming soon</option></select></label>
               <label>Quantity<input name="quantity" type="number" min="1" value={draft.quantity} onChange={handleDraftChange} required /></label>
               <label>Unit<input name="unit" value={draft.unit} onChange={handleDraftChange} maxLength={30} required /></label>
               <label>Price (₵)<input name="price" type="number" min="0" step="0.01" value={draft.price} onChange={handleDraftChange} required /></label>
@@ -244,7 +251,7 @@ function Dashboard() {
             </form>
           ) : (
             <article key={item._id} className="produce-row">
-              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} {item.unit || 'unit'}</p></div><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div>
+              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} {item.unit || 'unit'}</p></div><div className="produce-row-badges"><span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div></div>
               <strong className="row-price">₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
               <div className="row-actions"><button type="button" className="icon-button" onClick={() => startEditing(item)} aria-label={`Edit ${item.name}`}>Edit</button><button type="button" className="icon-button" onClick={() => openImageEditor(item)} aria-label={`Change image for ${item.name}`}>Edit image</button><button type="button" className="icon-button delete-button" onClick={() => deleteListing(item._id)} disabled={deletingId === item._id} aria-label={`Delete ${item.name}`}>{deletingId === item._id ? '...' : 'Delete'}</button></div>
             </article>

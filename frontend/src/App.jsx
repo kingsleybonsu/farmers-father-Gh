@@ -11,6 +11,9 @@ import SellProduce from './pages/SellProduce.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import HomeHero from './pages/HomeHero.jsx';
 import DashboardPlaceholder from './pages/DashboardPlaceholder.jsx';
+import NotFound from './pages/NotFound.jsx';
+import Profile from './pages/Profile.jsx';
+import Settings from './pages/Settings.jsx';
 import { clearStoredSession, SESSION_EXPIRED_EVENT } from './api/axios.js';
 
 const PrivateRoute = ({ children, isAuthenticated, sessionExpired }) => {
@@ -26,6 +29,7 @@ const PrivateRoute = ({ children, isAuthenticated, sessionExpired }) => {
 function App({ initialSession }) {
   const [isAuthenticated, setIsAuthenticated] = useState(initialSession.isAuthenticated);
   const [sessionExpired, setSessionExpired] = useState(initialSession.sessionExpired);
+  const [farmerName, setFarmerName] = useState(() => localStorage.getItem('farmerName'));
   const [theme, setTheme] = useState(() => localStorage.getItem('farmTheme') || 'light');
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,19 +62,22 @@ function App({ initialSession }) {
     }
   }, [initialSession.sessionExpired, location.pathname, navigate]);
 
-  const farmerName = localStorage.getItem('farmerName');
   const isFarmerWorkspace = isAuthenticated && location.pathname !== '/' && !location.pathname.startsWith('/farmers/');
 
   const handleLogout = () => {
     clearStoredSession();
     setIsAuthenticated(false);
+    setFarmerName(null);
     setSessionExpired(false);
     navigate('/');
   };
 
   const handleAuthenticated = (authenticated) => {
     setIsAuthenticated(authenticated);
-    if (authenticated) setSessionExpired(false);
+    if (authenticated) {
+      setSessionExpired(false);
+      setFarmerName(localStorage.getItem('farmerName'));
+    }
   };
 
   const authProps = useMemo(
@@ -105,11 +112,9 @@ function App({ initialSession }) {
             }
           />
           <Route path="/produce" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><Dashboard /></PrivateRoute>} />
-          <Route path="/orders" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><DashboardPlaceholder title="Orders" /></PrivateRoute>} />
-          <Route path="/sales" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><DashboardPlaceholder title="Sales" /></PrivateRoute>} />
-          <Route path="/messages" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><DashboardPlaceholder title="Messages" /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><DashboardPlaceholder title="Profile" /></PrivateRoute>} />
-          <Route path="/settings" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><DashboardPlaceholder title="Settings" /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><Profile onProfileUpdated={setFarmerName} /></PrivateRoute>} />
+          <Route path="/settings" element={<PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}><Settings onLogout={handleLogout} /></PrivateRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </div>
       </main>

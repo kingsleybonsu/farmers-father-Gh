@@ -4,6 +4,11 @@ import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
 const categories = ['All', 'Fruits', 'Vegetables', 'Grains', 'Tubers', 'Livestock'];
+const produceStatusLabels = {
+  available: 'Available',
+  sold_out: 'Sold out',
+  coming_soon: 'Coming soon',
+};
 const suggestionIcons = {
   produce: '🌿',
   farmer: '👤',
@@ -276,7 +281,7 @@ function Marketplace() {
 
                 <div className="farmer-produce-list">
                   {farmer.items.map((item) => (
-                    <div key={item._id} className="farmer-produce-item">
+                    <div key={item._id} className={`farmer-produce-item${item.status === 'sold_out' ? ' sold-out' : ''}`}>
                       <div className="marketplace-produce-image">
                         <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
                         {item.imageUrl && (
@@ -294,6 +299,7 @@ function Marketplace() {
                         <span className="farmer-produce-location">{item.location}</span>
                       </div>
                       <div className="farmer-produce-meta">
+                        <span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span>
                         <span>{item.quantity} {item.unit || 'unit'}</span>
                         <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
                       </div>

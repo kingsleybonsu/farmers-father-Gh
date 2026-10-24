@@ -65,7 +65,8 @@ exports.createProduce = async (req, res, next) => {
   let uploadedImage;
 
   try {
-    const { name, category, quantity, unit, price, location } = req.body;
+    const { name, category, status, quantity, unit, price, location } =
+      req.body;
     let imageUrl = "";
     let imagePublicId = "";
 
@@ -97,6 +98,7 @@ exports.createProduce = async (req, res, next) => {
       avatarStyle: req.farmer.avatarStyle || "neutral",
       name,
       category,
+      status: status || "available",
       quantity,
       unit,
       price,
@@ -179,6 +181,7 @@ exports.getAllProduce = async (req, res, next) => {
                     _id: "$_id",
                     name: "$name",
                     category: "$category",
+                    status: "$status",
                     quantity: "$quantity",
                     unit: "$unit",
                     price: "$price",
@@ -313,7 +316,9 @@ exports.getFarmerProduce = async (req, res, next) => {
       .sort({ createdAt: -1, _id: 1 })
       .skip((page - 1) * PRODUCE_PER_PAGE)
       .limit(PRODUCE_PER_PAGE)
-      .select("name category quantity unit price location imageUrl createdAt")
+      .select(
+        "name category status quantity unit price location imageUrl createdAt",
+      )
       .lean();
 
     res.json({
@@ -383,10 +388,19 @@ exports.updateProduce = async (req, res, next) => {
       return res.json(listing);
     }
 
-    const { name, category, quantity, unit, price, location } = req.body;
+    const { name, category, status, quantity, unit, price, location } =
+      req.body;
     const produce = await Produce.findOneAndUpdate(
       { _id: req.params.id, farmer: req.farmer._id },
-      { name, category, quantity, unit, price, location },
+      {
+        name,
+        category,
+        status: status || "available",
+        quantity,
+        unit,
+        price,
+        location,
+      },
       { new: true, runValidators: true },
     );
 

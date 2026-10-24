@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
-
-const avatarOptions = [
-  { id: 'male', label: 'Male', symbol: '👨‍🌾', color: '#d9f0ff' },
-  { id: 'female', label: 'Female', symbol: '👩‍🌾', color: '#fce7f3' },
-  { id: 'neutral', label: 'Neutral', symbol: '🌾', color: '#e7f6e9' },
-  { id: 'farm', label: 'Farm', symbol: '🚜', color: '#fff0d5' },
-];
+import AvatarPicker from '../components/AvatarPicker.jsx';
 
 function Register({ setIsAuthenticated }) {
   const [formData, setFormData] = useState({
@@ -63,24 +57,10 @@ function Register({ setIsAuthenticated }) {
           Email
           <input type="email" name="email" value={formData.email} onChange={handleChange} required />
         </label>
-        <div className="avatar-selector-block">
-          <span className="avatar-selector-label">Choose avatar style</span>
-          <div className="avatar-selector-grid">
-            {avatarOptions.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={`avatar-option ${formData.avatarStyle === option.id ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, avatarStyle: option.id })}
-                aria-label={`Choose ${option.label} avatar`}
-                style={{ backgroundColor: option.color }}
-              >
-                <span>{option.symbol}</span>
-                <small>{option.label}</small>
-              </button>
-            ))}
-          </div>
-        </div>
+        <AvatarPicker
+          value={formData.avatarStyle}
+          onChange={(avatarStyle) => setFormData((current) => ({ ...current, avatarStyle }))}
+        />
         <label>
           Password
           <div className="password-input-wrap">

@@ -9,6 +9,7 @@ function SellProduce() {
   const [formData, setFormData] = useState({
     name: '',
     category: 'Fruits',
+    status: 'available',
     quantity: '',
     unit: '',
     price: '',
@@ -75,6 +76,7 @@ function SellProduce() {
       const listing = new FormData();
       listing.append('name', formData.name);
       listing.append('category', formData.category);
+      listing.append('status', formData.status);
       listing.append('quantity', String(Number(formData.quantity)));
       listing.append('unit', formData.unit.trim());
       listing.append('price', String(Number(formData.price)));
@@ -83,7 +85,7 @@ function SellProduce() {
 
       await api.post('/produce', listing);
       setMessage('Produce listed successfully.');
-      setFormData({ name: '', category: 'Fruits', quantity: '', unit: '', price: '', location: '' });
+      setFormData({ name: '', category: 'Fruits', status: 'available', quantity: '', unit: '', price: '', location: '' });
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
@@ -113,6 +115,14 @@ function SellProduce() {
           </select>
         </label>
         <label>
+          Availability
+          <select name="status" value={formData.status} onChange={handleChange}>
+            <option value="available">Available</option>
+            <option value="sold_out">Sold out</option>
+            <option value="coming_soon">Coming soon</option>
+          </select>
+        </label>
+        <label>
           Quantity
           <input
             name="quantity"
@@ -139,8 +149,8 @@ function SellProduce() {
           <input
             name="price"
             type="number"
-            min="0"
-            step="1"
+            min="0.01"
+            step="0.01"
             value={formData.price}
             onChange={handleChange}
             required
