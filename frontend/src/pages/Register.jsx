@@ -4,6 +4,8 @@ import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 import AvatarPicker from '../components/AvatarPicker.jsx';
 
+const MIN_PASSWORD_ERROR = 'Password must be at least 8 characters long.';
+
 function Register({ setIsAuthenticated }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -19,11 +21,18 @@ function Register({ setIsAuthenticated }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'password' && e.target.value.length >= 8) {
+      setError((current) => current === MIN_PASSWORD_ERROR ? '' : current);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (formData.password.length < 8) {
+      setError(MIN_PASSWORD_ERROR);
+      return;
+    }
 
     try {
       const response = await api.post('/auth/register', formData);
@@ -69,7 +78,11 @@ function Register({ setIsAuthenticated }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              minLength={8}
               required
+              onInvalid={(event) => {
+                if (event.currentTarget.validity.tooShort) setError(MIN_PASSWORD_ERROR);
+              }}
             />
             <button
               type="button"
@@ -80,6 +93,7 @@ function Register({ setIsAuthenticated }) {
               {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
+          <small>At least 8 characters</small>
         </label>
         {error && <div className="form-error">{error}</div>}
         <button type="submit" className="primary-button">Register</button>

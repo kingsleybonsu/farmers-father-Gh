@@ -11,6 +11,12 @@ const generateToken = (farmerId) => {
 exports.registerFarmer = async (req, res, next) => {
   try {
     const { name, farmName, phone, email, password, avatarStyle } = req.body;
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long.",
+      });
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
 
     const existingFarmer = await Farmer.findOne({ email: normalizedEmail });
