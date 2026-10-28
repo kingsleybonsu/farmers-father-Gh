@@ -31,6 +31,9 @@ function App({ initialSession }) {
   const [sessionExpired, setSessionExpired] = useState(initialSession.sessionExpired);
   const [farmerName, setFarmerName] = useState(() => localStorage.getItem('farmerName'));
   const [theme, setTheme] = useState(() => localStorage.getItem('farmTheme') || 'light');
+  const [marketplaceSuggestions, setMarketplaceSuggestions] = useState([]);
+  const [activeMarketplaceSuggestion, setActiveMarketplaceSuggestion] = useState(-1);
+  const [marketplaceSuggestionsDismissed, setMarketplaceSuggestionsDismissed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const startupExpirationHandled = useRef(false);
@@ -87,12 +90,22 @@ function App({ initialSession }) {
 
   return (
     <div className="app-shell">
-      <Navbar {...authProps} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))} onLogout={handleLogout} />
+      <Navbar
+        {...authProps}
+        theme={theme}
+        onThemeToggle={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))}
+        onLogout={handleLogout}
+        suggestions={marketplaceSuggestions}
+        activeSuggestion={activeMarketplaceSuggestion}
+        setActiveSuggestion={setActiveMarketplaceSuggestion}
+        suggestionsDismissed={marketplaceSuggestionsDismissed}
+        setSuggestionsDismissed={setMarketplaceSuggestionsDismissed}
+      />
       <main className={isFarmerWorkspace ? 'page-content farmer-workspace' : 'page-content'}>
         {isFarmerWorkspace && <FarmerNavigation />}
         <div className={isFarmerWorkspace ? 'farmer-workspace-content' : ''}>
         <Routes>
-          <Route path="/" element={<><HomeHero /><Marketplace /></>} />
+          <Route path="/" element={<><HomeHero /><Marketplace setSuggestions={setMarketplaceSuggestions} setActiveSuggestion={setActiveMarketplaceSuggestion} setSuggestionsDismissed={setMarketplaceSuggestionsDismissed} /></>} />
           <Route path="/farmers/:farmerId" element={<FarmerPage />} />
           <Route path="/register" element={<Register setIsAuthenticated={handleAuthenticated} />} />
           <Route path="/login" element={<Login setIsAuthenticated={handleAuthenticated} sessionExpired={sessionExpired} />} />

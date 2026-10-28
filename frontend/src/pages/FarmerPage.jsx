@@ -97,6 +97,10 @@ function FarmerPage() {
               <p>{farmer.farmName}</p>
             </div>
           </header>
+          <aside className="safety-notice" role="note">
+            <span className="safety-notice-icon" aria-hidden="true">i</span>
+            <p>Safety tip: Never pay before you see the produce. Pay on delivery or on pickup. Farmers Father will never ask you to pay through a link or a phone call.</p>
+          </aside>
           <div className="farmer-detail-listings-heading">
             <h2>Available produce</h2>
             <span>{produce.length} of {totalProduce} shown</span>

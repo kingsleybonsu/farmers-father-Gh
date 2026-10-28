@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
@@ -9,13 +9,6 @@ const produceStatusLabels = {
   sold_out: 'Sold out',
   coming_soon: 'Coming soon',
 };
-const suggestionIcons = {
-  produce: '🌿',
-  farmer: '👤',
-  farm: '🏡',
-  location: '📍',
-};
-
 const avatarStyles = {
   male: { symbol: '👨‍🌾', color: '#d9f0ff' },
   female: { symbol: '👩‍🌾', color: '#fce7f3' },
@@ -23,20 +16,18 @@ const avatarStyles = {
   farm: { symbol: '🚜', color: '#fff0d5' },
 };
 
-function Marketplace() {
+function Marketplace({ setSuggestions, setActiveSuggestion, setSuggestionsDismissed }) {
   const [farmers, setFarmers] = useState([]);
   const [category, setCategory] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [suggestionQuery, setSuggestionQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [activeSuggestion, setActiveSuggestion] = useState(-1);
-  const [suggestionsDismissed, setSuggestionsDismissed] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const requestId = useRef(0);
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('q') || '';
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -141,104 +132,10 @@ function Marketplace() {
     }
   };
 
-  const suggestionsVisible = suggestions.length > 0
-    && suggestionQuery.length >= 2
-    && !suggestionsDismissed;
-
-  const chooseSuggestion = (suggestion) => {
-    setSearchTerm(suggestion.value);
-    setDebouncedSearch(suggestion.value);
-    setSuggestionQuery(suggestion.value);
-    setSuggestionsDismissed(true);
-    setActiveSuggestion(-1);
-  };
-
-  const handleSearchKeyDown = (event) => {
-    if (!suggestionsVisible) {
-      if (event.key === 'Escape') setSuggestionsDismissed(true);
-      return;
-    }
-
-    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-      event.preventDefault();
-      setActiveSuggestion((current) => (current + 1) % suggestions.length);
-    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-      event.preventDefault();
-      setActiveSuggestion((current) => (current <= 0 ? suggestions.length - 1 : current - 1));
-    } else if (event.key === 'Enter' && activeSuggestion >= 0) {
-      event.preventDefault();
-      chooseSuggestion(suggestions[activeSuggestion]);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      setSuggestionsDismissed(true);
-      setActiveSuggestion(-1);
-    }
-  };
-
   return (
     <section className="page-card">
       <div className="marketplace-header">
         <h1>Marketplace</h1>
-        <div className="marketplace-search-area">
-          <div
-            id="marketplace-suggestions"
-            className={`marketplace-suggestions${suggestionsVisible ? ' is-visible' : ''}`}
-            role="listbox"
-            aria-label="Search suggestions"
-          >
-            {suggestionsVisible && suggestions.map((suggestion, index) => (
-              <button
-                key={`${suggestion.type}-${suggestion.value}`}
-                id={`marketplace-suggestion-${index}`}
-                className={`suggestion-chip${index === activeSuggestion ? ' active' : ''}`}
-                type="button"
-                role="option"
-                aria-selected={index === activeSuggestion}
-                title={suggestion.value}
-                onMouseEnter={() => setActiveSuggestion(index)}
-                onClick={() => chooseSuggestion(suggestion)}
-              >
-                <span aria-hidden="true">{suggestionIcons[suggestion.type]}</span>
-                <span className="suggestion-chip-text">{suggestion.value}</span>
-              </button>
-            ))}
-          </div>
-          <label className="marketplace-search-wrap">
-            <span className="sr-only">Search farmers, farms, produce, or location</span>
-            <span className="marketplace-search-icon" aria-hidden="true">⌕</span>
-            <input
-              className="marketplace-search"
-              type="search"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded={suggestionsVisible}
-              aria-controls="marketplace-suggestions"
-              aria-activedescendant={activeSuggestion >= 0 ? `marketplace-suggestion-${activeSuggestion}` : undefined}
-              value={searchTerm}
-              onChange={(event) => {
-                setSearchTerm(event.target.value);
-                setSuggestionsDismissed(false);
-                setActiveSuggestion(-1);
-              }}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search farmers, produce, location..."
-              maxLength={100}
-            />
-            {searchTerm && (
-              <button
-                className="marketplace-search-clear"
-                type="button"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSuggestionsDismissed(false);
-                }}
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </label>
-        </div>
       </div>
       <div className="marketplace-filters">
         <div className="category-tabs">
@@ -254,6 +151,10 @@ function Marketplace() {
         </div>
       </div>
       {error && <div className="form-error">{error}</div>}
+      <aside className="safety-notice compact" role="note">
+        <span className="safety-notice-icon" aria-hidden="true">i</span>
+        <p>Never pay before you see the produce.</p>
+      </aside>
       <div className="farmer-card-grid">
         {loading && farmers.length === 0 ? (
           <p className="empty-state">Loading farmers...</p>

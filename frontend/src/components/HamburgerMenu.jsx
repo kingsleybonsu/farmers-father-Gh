@@ -32,12 +32,18 @@ function HamburgerMenu({ isAuthenticated, farmerName, onLogout, theme, onThemeTo
               <Link to="/produce" onClick={() => setOpen(false)}>My produce</Link>
               <Link to="/profile" onClick={() => setOpen(false)}>Profile</Link>
               <Link to="/settings" onClick={() => setOpen(false)}>Settings</Link>
+              <button type="button" className="mobile-menu-theme-toggle" onClick={onThemeToggle}>
+                {theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode'}
+              </button>
               <button className="nav-button mobile-logout" onClick={onLogout}>
                 Logout
               </button>
             </>
           ) : (
             <>
+              <button type="button" className="mobile-menu-theme-toggle" onClick={onThemeToggle}>
+                {theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode'}
+              </button>
               <Link to="/login" onClick={() => setOpen(false)}>
                 Login
               </Link>
