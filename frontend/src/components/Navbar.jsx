@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu.jsx';
+import logoIcon from '../assets/images/logo-icon-white.png.png';
 
 const suggestionIcons = {
   produce: '🌿',
@@ -125,7 +126,7 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle, s
     <header className="navbar">
       <div className="nav-brand">
         <Link to="/" aria-label="Farmers Father home">
-          <span className="brand-mark">✿</span>
+          <img src={logoIcon} alt="" className="brand-logo" />
           <span>FARMERS FATHER <small>GH</small></span>
         </Link>
       </div>

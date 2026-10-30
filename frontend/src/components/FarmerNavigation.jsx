@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import logoIcon from '../assets/images/logo-icon-white.png.png';
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: '▦' },
@@ -12,7 +13,7 @@ function FarmerNavigation() {
     <>
       <aside className="farmer-sidebar" aria-label="Farmer dashboard navigation">
         <div className="farmer-sidebar-brand">
-          <span className="farmer-brand-mark">✿</span>
+          <img src={logoIcon} alt="" className="brand-logo" />
           <span>Farmers Father</span>
         </div>
         <nav className="farmer-sidebar-links">

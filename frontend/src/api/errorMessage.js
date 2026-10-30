@@ -1,5 +1,5 @@
 const SERVER_ERROR_MESSAGE =
-  "Something went wrong on our side. Please try again in a moment.";
+  "Something went wrong. Please try again in a moment or check your internet connection.";
 
 export function getUserFriendlyErrorMessage(
   error,
