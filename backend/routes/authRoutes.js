@@ -13,7 +13,7 @@ const router = express.Router();
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit each IP to 20 attempts per windowMs
+  max: 100, // Generous limit for mobile/desktop testing
   standardHeaders: true,
   legacyHeaders: false,
   message: {

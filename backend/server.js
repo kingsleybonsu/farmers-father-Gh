@@ -13,21 +13,32 @@ const produceRoutes = require("./routes/produceRoutes");
 
 const app = express();
 
+// Trust reverse proxy (Vite dev proxy, Render, Heroku)
+app.set("trust proxy", 1);
+
 // Security Headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-// CORS Configuration
-const allowedOrigins = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(",").map((o) => o.trim())
-  : ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"];
+// CORS Configuration - allows configured production origin + all local/private network IPs for mobile testing
+const localNetworkPattern =
+  /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (process.env.CLIENT_ORIGIN) {
+    const configured = process.env.CLIENT_ORIGIN.split(",").map((o) => o.trim());
+    if (configured.includes(origin) || configured.includes("*")) return true;
+  }
+  return localNetworkPattern.test(origin);
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
-      return callback(new Error("CORS policy does not allow access from this origin."));
+      return callback(null, false);
     },
     credentials: true,
   })

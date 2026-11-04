@@ -98,7 +98,18 @@ function Profile({ onProfileUpdated }) {
           </label>
           <label>
             Phone
-            <input name="phone" value={formData.phone} onChange={handleChange} required />
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="e.g. 024 123 4567"
+              pattern="\s*(\+233|0)(\s*\d){9}\s*"
+              title="Enter a Ghana phone number like 024 123 4567"
+              required
+            />
           </label>
           <label>
             Location

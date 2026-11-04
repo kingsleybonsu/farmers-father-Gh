@@ -8,6 +8,7 @@ function Login({ setIsAuthenticated, sessionExpired }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
@@ -15,10 +16,16 @@ function Login({ setIsAuthenticated, sessionExpired }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setError('');
+    setIsSubmitting(true);
 
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', {
+        email: email.trim(),
+        password,
+      });
       localStorage.setItem('farmerToken', response.data.token);
       localStorage.setItem('farmerName', response.data.farmer.name);
       localStorage.setItem('farmerAvatar', response.data.farmer.avatarStyle || 'neutral');
@@ -26,6 +33,8 @@ function Login({ setIsAuthenticated, sessionExpired }) {
       navigate(from, { replace: true });
     } catch (err) {
       setError(getUserFriendlyErrorMessage(err, 'Login failed'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -38,7 +47,17 @@ function Login({ setIsAuthenticated, sessionExpired }) {
       <form className="form-grid" onSubmit={handleSubmit}>
         <label>
           Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
+            autoComplete="email"
+            disabled={isSubmitting}
+            required
+          />
         </label>
         <label>
           Password
@@ -47,6 +66,11 @@ function Login({ setIsAuthenticated, sessionExpired }) {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
+              autoComplete="current-password"
+              disabled={isSubmitting}
               required
             />
             <button
@@ -54,13 +78,16 @@ function Login({ setIsAuthenticated, sessionExpired }) {
               className="password-toggle"
               onClick={() => setShowPassword((prev) => !prev)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
+              disabled={isSubmitting}
             >
               {showPassword ? 'Hide' : 'Show'}
             </button>
           </div>
         </label>
         {error && <div className="form-error">{error}</div>}
-        <button type="submit" className="primary-button">Login</button>
+        <button type="submit" className="primary-button" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </button>
       </form>
       <p className="auth-switch">
         Don't have an account? <Link to="/register">Create one</Link>

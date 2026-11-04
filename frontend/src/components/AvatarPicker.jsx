@@ -5,7 +5,7 @@ const avatarOptions = [
   { id: 'farm', label: 'Farm', symbol: '🚜', color: '#fff0d5' },
 ];
 
-function AvatarPicker({ value, onChange }) {
+function AvatarPicker({ value, onChange, disabled }) {
   return (
     <div className="avatar-selector-block">
       <span className="avatar-selector-label">Choose avatar style</span>
@@ -19,6 +19,7 @@ function AvatarPicker({ value, onChange }) {
             aria-label={`Choose ${option.label} avatar`}
             aria-pressed={value === option.id}
             style={{ backgroundColor: option.color }}
+            disabled={disabled}
           >
             <span>{option.symbol}</span>
             <small>{option.label}</small>
