@@ -133,7 +133,7 @@ function Marketplace({ setSuggestions, setActiveSuggestion, setSuggestionsDismis
   };
 
   return (
-    <section className="page-card">
+    <section id="marketplace" className="page-card">
       <div className="marketplace-header">
         <h1>Marketplace</h1>
       </div>

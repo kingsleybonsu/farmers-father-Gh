@@ -6,12 +6,33 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const produceRoutes = require("./routes/produceRoutes");
 
 const app = express();
-app.use(cors());
+
+// Security Headers
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+
+// CORS Configuration
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(",").map((o) => o.trim())
+  : ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS policy does not allow access from this origin."));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Routes
@@ -43,8 +64,7 @@ app.use((err, req, res, next) => {
 
 // Environment Configuration
 const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URI;
-
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 if (!MONGO_URI) {
   console.error(
     "Missing database environment variable. Please set MONGO_URI in your .env file.",

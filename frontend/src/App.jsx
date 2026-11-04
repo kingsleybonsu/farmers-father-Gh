@@ -10,7 +10,6 @@ import Login from './pages/Login.jsx';
 import SellProduce from './pages/SellProduce.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import HomeHero from './pages/HomeHero.jsx';
-import DashboardPlaceholder from './pages/DashboardPlaceholder.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Profile from './pages/Profile.jsx';
 import Settings from './pages/Settings.jsx';
@@ -105,7 +104,7 @@ function App({ initialSession }) {
         {isFarmerWorkspace && <FarmerNavigation />}
         <div className={isFarmerWorkspace ? 'farmer-workspace-content' : ''}>
         <Routes>
-          <Route path="/" element={<><HomeHero /><Marketplace setSuggestions={setMarketplaceSuggestions} setActiveSuggestion={setActiveMarketplaceSuggestion} setSuggestionsDismissed={setMarketplaceSuggestionsDismissed} /></>} />
+          <Route path="/" element={<><HomeHero isAuthenticated={isAuthenticated} /><Marketplace setSuggestions={setMarketplaceSuggestions} setActiveSuggestion={setActiveMarketplaceSuggestion} setSuggestionsDismissed={setMarketplaceSuggestionsDismissed} /></>} />
           <Route path="/farmers/:farmerId" element={<FarmerPage />} />
           <Route path="/register" element={<Register setIsAuthenticated={handleAuthenticated} />} />
           <Route path="/login" element={<Login setIsAuthenticated={handleAuthenticated} sessionExpired={sessionExpired} />} />

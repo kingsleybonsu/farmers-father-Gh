@@ -53,6 +53,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body,
 #root {
@@ -494,6 +498,10 @@ button {
 
 .dashboard-placeholder p:last-child {
   color: var(--text-muted);
+}
+
+#marketplace {
+  scroll-margin-top: 5.5rem;
 }
 
 .page-card {
@@ -1088,6 +1096,24 @@ button:focus {
   padding: 0.95rem 1.25rem;
   border-radius: 0.95rem;
   font-weight: 700;
+}
+
+.auth-switch {
+  margin-top: 1.25rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-switch a:hover {
+  opacity: 0.85;
 }
 
 .card-grid {

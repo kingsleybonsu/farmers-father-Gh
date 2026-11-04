@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 import AvatarPicker from '../components/AvatarPicker.jsx';
@@ -98,6 +98,9 @@ function Register({ setIsAuthenticated }) {
         {error && <div className="form-error">{error}</div>}
         <button type="submit" className="primary-button">Register</button>
       </form>
+      <p className="auth-switch">
+        Already have an account? <Link to="/login">Log in</Link>
+      </p>
     </section>
   );
 }

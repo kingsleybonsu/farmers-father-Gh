@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
@@ -6,6 +7,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const permittedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 function SellProduce() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     category: 'Fruits',
@@ -88,6 +90,7 @@ function SellProduce() {
       setFormData({ name: '', category: 'Fruits', status: 'available', quantity: '', unit: '', price: '', location: '' });
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      navigate('/dashboard');
     } catch (err) {
       setError(getUserFriendlyErrorMessage(err, 'Unable to create listing.'));
     } finally {

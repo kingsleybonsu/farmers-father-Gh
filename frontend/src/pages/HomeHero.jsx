@@ -1,6 +1,14 @@
 import { Link } from 'react-router-dom';
 
-function HomeHero() {
+function HomeHero({ isAuthenticated }) {
+  const handleScrollToMarketplace = (e) => {
+    e.preventDefault();
+    const marketplaceEl = document.getElementById('marketplace');
+    if (marketplaceEl) {
+      marketplaceEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="hero-section">
       <div className="hero-copy">
@@ -11,12 +19,22 @@ function HomeHero() {
           Join the marketplace and start selling or buying today.
         </p>
         <div className="hero-actions">
-          <Link className="primary-button hero-button" to="/register">
-            Become a Farmer
-          </Link>
-          <Link className="secondary-button hero-button" to="/">
-           View Available Produce
-          </Link>
+          {isAuthenticated ? (
+            <Link className="primary-button hero-button" to="/dashboard">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link className="primary-button hero-button" to="/register">
+              Become a Farmer
+            </Link>
+          )}
+          <a
+            className="secondary-button hero-button"
+            href="#marketplace"
+            onClick={handleScrollToMarketplace}
+          >
+            View Available Produce
+          </a>
         </div>
       </div>
     </section>

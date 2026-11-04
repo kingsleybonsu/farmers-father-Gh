@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
@@ -62,6 +62,9 @@ function Login({ setIsAuthenticated, sessionExpired }) {
         {error && <div className="form-error">{error}</div>}
         <button type="submit" className="primary-button">Login</button>
       </form>
+      <p className="auth-switch">
+        Don't have an account? <Link to="/register">Create one</Link>
+      </p>
     </section>
   );
 }
