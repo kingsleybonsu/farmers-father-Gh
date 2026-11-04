@@ -996,7 +996,7 @@ button {
 
 .avatar-selector-label {
   font-weight: 700;
-  color: white;
+  color: var(--text);
 }
 
 .avatar-selector-grid {
@@ -1028,8 +1028,8 @@ button {
 }
 
 .avatar-option.active {
-  border-color: red;
-  box-shadow: red;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary);
   transform: translateY(-1px);
 }
 

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import logoIcon from '../assets/images/logo-icon-white.png.png';
+import logoIcon from '../assets/images/logo-icon-white.png';
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: '▦' },

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu.jsx';
-import logoIcon from '../assets/images/logo-icon-white.png.png';
+import logoIcon from '../assets/images/logo-icon-white.png';
 
 const suggestionIcons = {
   produce: '🌿',

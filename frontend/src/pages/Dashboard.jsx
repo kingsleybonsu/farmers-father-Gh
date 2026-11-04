@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
@@ -203,7 +204,7 @@ function Dashboard() {
             <p className="dashboard-subtitle">Keep your listings fresh and ready for buyers.</p>
           </div>
         </div>
-        <a className="primary-button dashboard-add" href="/sell">+ Add produce</a>
+        <Link className="primary-button dashboard-add" to="/sell">+ Add produce</Link>
       </div>
       <div className="dashboard-stats">
         <div className="stat-card"><span>Total listings</span><strong>{produce.length}</strong></div>
@@ -240,13 +241,13 @@ function Dashboard() {
         ) : (
           filteredProduce.map((item) => editingId === item._id ? (
             <form key={item._id} className="produce-row produce-row-edit" onSubmit={(event) => { event.preventDefault(); saveChanges(item._id); }}>
-              <div className="produce-row-title"><div className="produce-icon">✿</div><div><input className="inline-name" name="name" value={draft.name} onChange={handleDraftChange} required /><span className="stock-badge">Editing</span></div></div>
+              <div className="produce-row-title"><div className="produce-icon">✿</div><div><input className="inline-name" name="name" value={draft.name} onChange={handleDraftChange} maxLength={30} required /><span className="stock-badge">Editing</span></div></div>
               <label>Category<select name="category" value={draft.category} onChange={handleDraftChange}><option>Fruits</option><option>Vegetables</option><option>Grains</option><option>Tubers</option><option>Livestock</option></select></label>
               <label>Availability<select name="status" value={draft.status} onChange={handleDraftChange}><option value="available">Available</option><option value="sold_out">Sold out</option><option value="coming_soon">Coming soon</option></select></label>
               <label>Quantity<input name="quantity" type="number" min="1" value={draft.quantity} onChange={handleDraftChange} required /></label>
               <label>Unit<input name="unit" value={draft.unit} onChange={handleDraftChange} maxLength={30} required /></label>
               <label>Price (₵)<input name="price" type="number" min="0" step="0.01" value={draft.price} onChange={handleDraftChange} required /></label>
-              <label>Location<input name="location" value={draft.location} onChange={handleDraftChange} required /></label>
+              <label>Location<input name="location" value={draft.location} onChange={handleDraftChange} maxLength={40} required /></label>
               <div className="row-actions"><button type="button" className="secondary-button compact-button" onClick={cancelEditing}>Undo</button><button type="submit" className="primary-button compact-button" disabled={savingId === item._id}>{savingId === item._id ? 'Saving...' : 'Save changes'}</button></div>
             </form>
           ) : (

@@ -102,7 +102,7 @@ function SellProduce() {
       <form className="form-grid" onSubmit={handleSubmit}>
         <label>
           Produce Name
-          <input name="name" value={formData.name} onChange={handleChange} maxLength={15} required />
+          <input name="name" value={formData.name} onChange={handleChange} maxLength={30} required />
         </label>
         <label>
           Category
@@ -158,7 +158,7 @@ function SellProduce() {
         </label>
         <label>
           Location
-          <input name="location" value={formData.location} onChange={handleChange} maxLength={20} required />
+          <input name="location" value={formData.location} onChange={handleChange} maxLength={40} required />
         </label>
         <div className="produce-image-field">
           <label htmlFor="produce-image">Produce image <span>(optional)</span></label>
