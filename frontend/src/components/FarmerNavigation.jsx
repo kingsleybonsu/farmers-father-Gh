@@ -6,6 +6,7 @@ const navigationItems = [
   { label: 'My produce', path: '/produce', icon: '✿' },
   { label: 'Profile', path: '/profile', icon: '♙' },
   { label: 'Settings', path: '/settings', icon: '⚙' },
+  { label: 'Marketplace', path: '/', icon: '🛖' },
 ];
 
 function FarmerNavigation() {
