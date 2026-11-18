@@ -3,7 +3,7 @@ const Farmer = require("../models/Farmer");
 const Produce = require("../models/Produce");
 
 const generateToken = (farmerId) => {
-  return jwt.sign({ id: farmerId }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: farmerId, role: "farmer" }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
 };

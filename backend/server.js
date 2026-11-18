@@ -9,6 +9,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
+const buyerRoutes = require("./routes/buyerRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const produceRoutes = require("./routes/produceRoutes");
 
 const app = express();
@@ -48,6 +50,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/buyers", buyerRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/produce", produceRoutes);
 
 // Global Error Handler

@@ -35,8 +35,7 @@ function FarmerNavigation() {
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => isActive ? 'farmer-bottom-link active' : 'farmer-bottom-link'}
-          >
+            className={({ isActive }) => isActive ? 'farmer-bottom-link active' : 'farmer-bottom-link'}>
             <span className="farmer-nav-icon" aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
           </NavLink>
