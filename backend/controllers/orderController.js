@@ -230,7 +230,7 @@ exports.getBuyerOrders = async (req, res, next) => {
     const [orders, totalOrders] = await Promise.all([
       Order.find(query)
         .select(
-          "farmName items total status declineReason fulfilment createdAt",
+          "checkoutGroupId farmer farmName pickupArea note items total status declineReason fulfilment createdAt",
         )
         .sort({ createdAt: -1, _id: -1 })
         .skip((page - 1) * ORDERS_PER_PAGE)
@@ -240,7 +240,20 @@ exports.getBuyerOrders = async (req, res, next) => {
     ]);
 
     res.json({
-      orders,
+      orders: orders.map((order) => ({
+        _id: order._id,
+        checkoutGroupId: order.checkoutGroupId,
+        farmerId: order.farmer.toString(),
+        farmName: order.farmName,
+        pickupArea: order.pickupArea,
+        note: order.note,
+        items: order.items,
+        total: order.total,
+        status: order.status,
+        declineReason: order.declineReason,
+        fulfilment: order.fulfilment,
+        createdAt: order.createdAt,
+      })),
       page,
       pageSize: ORDERS_PER_PAGE,
       totalOrders,
@@ -304,7 +317,7 @@ exports.getFarmerOrders = async (req, res, next) => {
     const [orders, totalOrders] = await Promise.all([
       Order.find(query)
         .select(
-          "buyerName buyerPhone pickupArea note items total status declineReason fulfilment createdAt",
+          "checkoutGroupId buyerName buyerPhone pickupArea note items total status declineReason fulfilment createdAt",
         )
         .sort({ createdAt: -1, _id: -1 })
         .skip((page - 1) * ORDERS_PER_PAGE)

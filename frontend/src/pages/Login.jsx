@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import api from '../api/axios.js';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import api, { clearStoredSession } from '../api/axios.js';
+import buyerApi, {
+  clearStoredBuyerSession,
+  storeBuyerSession,
+} from '../api/buyerApi.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
-function Login({ setIsAuthenticated, sessionExpired }) {
+function Login({
+  setIsAuthenticated,
+  onBuyerAuthenticated,
+  sessionExpired,
+  buyerSessionExpired,
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -11,8 +20,25 @@ function Login({ setIsAuthenticated, sessionExpired }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const role = searchParams.get('role') === 'buyer' ? 'buyer' : 'farmer';
   const from = location.state?.from?.pathname || '/dashboard';
-  const showSessionExpired = sessionExpired || location.state?.sessionExpired;
+  const showSessionExpired = role === 'buyer'
+    ? buyerSessionExpired || (
+      location.state?.sessionExpired &&
+      location.state?.expiredRole === 'buyer'
+    )
+    : sessionExpired || (
+      location.state?.sessionExpired &&
+      location.state?.expiredRole !== 'buyer'
+    );
+
+  const selectRole = (nextRole) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('role', nextRole);
+    setSearchParams(nextParams, { replace: true });
+    setError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +48,27 @@ function Login({ setIsAuthenticated, sessionExpired }) {
     setIsSubmitting(true);
 
     try {
+      if (role === 'buyer') {
+        const response = await buyerApi.post('/buyers/login', {
+          email: email.trim(),
+          password,
+        });
+        clearStoredSession();
+        setIsAuthenticated(false);
+        if (!storeBuyerSession(response.data.token, response.data.buyer.name)) {
+          setError('Unable to save your buyer session. Check your browser storage settings.');
+          return;
+        }
+        onBuyerAuthenticated(response.data.buyer);
+        navigate(location.state?.from || '/cart', { replace: true });
+        return;
+      }
+
       const response = await api.post('/auth/login', {
         email: email.trim(),
         password,
       });
+      clearStoredBuyerSession();
       localStorage.setItem('farmerToken', response.data.token);
       localStorage.setItem('farmerName', response.data.farmer.name);
       localStorage.setItem('farmerAvatar', response.data.farmer.avatarStyle || 'neutral');
@@ -44,6 +87,26 @@ function Login({ setIsAuthenticated, sessionExpired }) {
       {showSessionExpired && (
         <div className="form-error" role="alert">Your session expired, please log in again</div>
       )}
+      <div className="auth-role-toggle" role="group" aria-label="Choose account type">
+        <button
+          type="button"
+          className={role === 'buyer' ? 'active' : ''}
+          aria-pressed={role === 'buyer'}
+          onClick={() => selectRole('buyer')}
+          disabled={isSubmitting}
+        >
+          I'm a buyer
+        </button>
+        <button
+          type="button"
+          className={role === 'farmer' ? 'active' : ''}
+          aria-pressed={role === 'farmer'}
+          onClick={() => selectRole('farmer')}
+          disabled={isSubmitting}
+        >
+          I'm a farmer
+        </button>
+      </div>
       <form className="form-grid" onSubmit={handleSubmit}>
         <label>
           Email
@@ -90,7 +153,7 @@ function Login({ setIsAuthenticated, sessionExpired }) {
         </button>
       </form>
       <p className="auth-switch">
-        Don't have an account? <Link to="/register">Create one</Link>
+        Don't have an account? <Link to={`/register?role=${role}`}>Create one</Link>
       </p>
     </section>
   );

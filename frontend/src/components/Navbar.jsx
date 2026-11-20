@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import HamburgerMenu from './HamburgerMenu.jsx';
 import logoIcon from '../assets/images/logo-icon-white.png';
+import { useCart } from '../context/CartContext.jsx';
 
 const suggestionIcons = {
   produce: '🌿',
@@ -17,13 +18,28 @@ const avatarStyles = {
   farm: { symbol: '🚜', color: '#fff0d5' },
 };
 
-function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle, suggestions, activeSuggestion, setActiveSuggestion, suggestionsDismissed, setSuggestionsDismissed }) {
+function Navbar({
+  isAuthenticated,
+  farmerName,
+  isBuyerAuthenticated,
+  buyerName,
+  onLogout,
+  onBuyerLogout,
+  theme,
+  onThemeToggle,
+  suggestions,
+  activeSuggestion,
+  setActiveSuggestion,
+  suggestionsDismissed,
+  setSuggestionsDismissed,
+}) {
   const [accountOpen, setAccountOpen] = useState(false);
   const [draftSearch, setDraftSearch] = useState('');
   const accountMenuRef = useRef(null);
   const accountButtonRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { itemCount } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMarketplace = location.pathname === '/';
   const searchQuery = searchParams.get('q') || '';
@@ -119,8 +135,11 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle, s
     }
   };
 
-  const firstName = farmerName?.trim().split(/\s+/)[0] || 'Account';
+  const firstName = (isBuyerAuthenticated ? buyerName : farmerName)
+    ?.trim()
+    .split(/\s+/)[0] || 'Account';
   const farmerAvatar = avatarStyles[localStorage.getItem('farmerAvatar')] || avatarStyles.neutral;
+  const buyerAvatar = { symbol: '🛍️', color: '#e7f6e9' };
 
   return (
     <header className="navbar">
@@ -182,8 +201,51 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle, s
         </div>
       </div>
 
-      <nav className={`nav-links${isAuthenticated ? ' authenticated-nav-links' : ' public-nav-links'}`}>
-        {isAuthenticated ? (
+      <nav className={`nav-links${isAuthenticated || isBuyerAuthenticated ? ' authenticated-nav-links' : ' public-nav-links'}`}>
+        <Link className="cart-nav-link" to="/cart" aria-label={`Shopping cart, ${itemCount} items`}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6" />
+            <circle cx="10" cy="20" r="1.2" />
+            <circle cx="18" cy="20" r="1.2" />
+          </svg>
+          <span className="cart-count-badge">{itemCount > 99 ? '99+' : itemCount}</span>
+          <span className="cart-nav-label">Cart</span>
+        </Link>
+        {isBuyerAuthenticated ? (
+          <>
+            <Link className="nav-link" to="/my-orders">My orders</Link>
+            <div className="nav-dropdown account-dropdown-wrap" ref={accountMenuRef}>
+              <button
+                ref={accountButtonRef}
+                className="account-trigger"
+                type="button"
+                onClick={() => setAccountOpen((open) => !open)}
+                aria-label={`Account menu for ${firstName}`}
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                aria-controls="buyer-account-menu"
+              >
+                <span className="account-avatar" style={{ backgroundColor: buyerAvatar.color }} aria-hidden="true">{buyerAvatar.symbol}</span>
+                <span className="account-first-name">{firstName}</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              {accountOpen && (
+                <div className="nav-dropdown-menu account-dropdown-menu" id="buyer-account-menu" role="menu">
+                  <Link role="menuitem" to="/" onClick={closeAccountMenu}>Marketplace</Link>
+                  <Link role="menuitem" to="/cart" onClick={closeAccountMenu}>Cart</Link>
+                  <Link role="menuitem" to="/my-orders" onClick={closeAccountMenu}>My orders</Link>
+                  <button role="menuitem" type="button" onClick={onThemeToggle}>
+                    {theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode'}
+                  </button>
+                  <div className="account-menu-separator" role="separator" />
+                  <button role="menuitem" className="account-menu-logout" type="button" onClick={() => { closeAccountMenu(); onBuyerLogout(); }}>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        ) : isAuthenticated ? (
           <>
             <Link className="nav-link" to="/sell">Sell produce</Link>
             <Link className="nav-link" to="/dashboard">Dashboard</Link>
@@ -230,7 +292,17 @@ function Navbar({ isAuthenticated, farmerName, onLogout, theme, onThemeToggle, s
         )}
       </nav>
 
-      <HamburgerMenu isAuthenticated={isAuthenticated} farmerName={farmerName} onLogout={onLogout} theme={theme} onThemeToggle={onThemeToggle} />
+      <HamburgerMenu
+        isAuthenticated={isAuthenticated}
+        farmerName={farmerName}
+        isBuyerAuthenticated={isBuyerAuthenticated}
+        buyerName={buyerName}
+        onLogout={onLogout}
+        onBuyerLogout={onBuyerLogout}
+        theme={theme}
+        onThemeToggle={onThemeToggle}
+        itemCount={itemCount}
+      />
     </header>
   );
 }

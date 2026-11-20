@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
+import { useCart } from '../context/CartContext.jsx';
 
 const avatarStyles = {
   male: { symbol: '👨‍🌾', color: '#d9f0ff' },
@@ -16,8 +17,85 @@ const produceStatusLabels = {
   coming_soon: 'Coming soon',
 };
 
+function FarmerProduceItem({ item, farmerId, farmName, highlightedProduceId }) {
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const confirmationTimer = useRef(null);
+  const { addItem } = useCart();
+  const status = item.status || 'available';
+  const stock = Math.max(0, Math.floor(Number(item.quantity) || 0));
+  const unavailable = status === 'sold_out' || status === 'coming_soon' || stock < 1;
+  const buttonLabel = status === 'sold_out'
+    ? 'Sold out'
+    : status === 'coming_soon'
+      ? 'Coming soon'
+      : 'Add to cart';
+
+  useEffect(() => () => window.clearTimeout(confirmationTimer.current), []);
+
+  useEffect(() => {
+    setQuantity((current) => Math.min(Math.max(1, current), Math.max(1, stock)));
+  }, [stock]);
+
+  const handleAddToCart = () => {
+    addItem({
+      produceId: item._id,
+      name: item.name,
+      unit: item.unit || 'unit',
+      unitPrice: Number(item.price),
+      maxQuantity: stock,
+      imageUrl: item.imageUrl || '',
+      farmerId,
+      farmName,
+    }, quantity);
+    setAdded(true);
+    window.clearTimeout(confirmationTimer.current);
+    confirmationTimer.current = window.setTimeout(() => setAdded(false), 1500);
+  };
+
+  return (
+    <article
+      id={`farmer-produce-${item._id}`}
+      className={`farmer-produce-item${status === 'sold_out' ? ' sold-out' : ''}${highlightedProduceId === item._id ? ' marketplace-target-highlight' : ''}`}
+    >
+      <div className="marketplace-produce-image">
+        <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
+        {item.imageUrl && (
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            loading="lazy"
+            onError={(event) => event.currentTarget.remove()}
+          />
+        )}
+      </div>
+      <div className="farmer-product-name-block">
+        <span className="farmer-produce-category">{item.category}</span>
+        <h3>{item.name}</h3>
+        <span className="farmer-produce-location">{item.location}</span>
+      </div>
+      <div className="farmer-produce-meta">
+        <span className={`produce-status-badge ${status}`}>{produceStatusLabels[status] || produceStatusLabels.available}</span>
+        <span>{item.quantity} {item.unit || 'unit'}</span>
+        <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
+      </div>
+      <div className="cart-add-controls">
+        <div className="quantity-stepper" aria-label={`Quantity for ${item.name}`}>
+          <button type="button" aria-label={`Decrease ${item.name} quantity`} onClick={() => setQuantity((current) => Math.max(1, current - 1))} disabled={unavailable || quantity <= 1}>−</button>
+          <span aria-live="polite">{quantity}</span>
+          <button type="button" aria-label={`Increase ${item.name} quantity`} onClick={() => setQuantity((current) => Math.min(stock, current + 1))} disabled={unavailable || quantity >= stock}>+</button>
+        </div>
+        <button className="add-to-cart-button" type="button" onClick={handleAddToCart} disabled={unavailable}>
+          {added ? 'Added to cart' : unavailable ? buttonLabel : 'Add to cart'}
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function FarmerPage() {
   const { farmerId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [farmer, setFarmer] = useState(null);
   const [produce, setProduce] = useState([]);
   const [totalProduce, setTotalProduce] = useState(0);
@@ -25,7 +103,15 @@ function FarmerPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [highlightedProduceId, setHighlightedProduceId] = useState('');
+  const [loadedFarmerId, setLoadedFarmerId] = useState('');
   const requestId = useRef(0);
+  const handledHighlightRequests = useRef(new Set());
+  const listingsRef = useRef({ produce, page, hasMore });
+  const loadingRef = useRef(loading);
+  listingsRef.current = { produce, page, hasMore };
+  loadingRef.current = loading;
+  const targetProduceId = searchParams.get('produce');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -43,6 +129,7 @@ function FarmerPage() {
       setTotalProduce(response.data.totalProduce);
       setPage(1);
       setHasMore(response.data.hasMore);
+      setLoadedFarmerId(farmerId);
     }).catch((err) => {
       if (err.name !== 'CanceledError' && currentRequest === requestId.current) {
         setError(getUserFriendlyErrorMessage(err, 'Unable to load this farmer.'));
@@ -77,6 +164,103 @@ function FarmerPage() {
     }
   };
 
+  useEffect(() => {
+    if (
+      !targetProduceId ||
+      !farmer ||
+      loadedFarmerId !== farmerId ||
+      loadingRef.current
+    ) return undefined;
+
+    const requestKey = `${farmerId}:${targetProduceId}`;
+    if (handledHighlightRequests.current.has(requestKey)) return undefined;
+
+    let cancelled = false;
+    const controller = new AbortController();
+    let loadedProduce = listingsRef.current.produce;
+    let currentPage = listingsRef.current.page;
+    let morePages = listingsRef.current.hasMore;
+
+    const clearTargetParameter = () => {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('produce');
+      setSearchParams(nextParams, { replace: true });
+    };
+
+    const findAndHighlightProduce = async () => {
+      let targetItem = loadedProduce.find(
+        (item) => item._id === targetProduceId,
+      );
+
+      while (!targetItem && morePages && !cancelled) {
+        setLoading(true);
+        const response = await api.get(`/produce/farmers/${farmerId}`, {
+          params: { page: currentPage + 1 },
+          signal: controller.signal,
+        });
+        if (cancelled) return;
+
+        loadedProduce = [...loadedProduce, ...response.data.produce];
+        currentPage = response.data.page;
+        morePages = response.data.hasMore;
+        setProduce(loadedProduce);
+        setTotalProduce(response.data.totalProduce);
+        setPage(currentPage);
+        setHasMore(morePages);
+        targetItem = loadedProduce.find(
+          (item) => item._id === targetProduceId,
+        );
+      }
+
+      if (cancelled) return;
+      if (targetItem) {
+        setHighlightedProduceId(targetProduceId);
+      }
+      handledHighlightRequests.current.add(requestKey);
+      setLoading(false);
+      clearTargetParameter();
+    };
+
+    findAndHighlightProduce().catch((err) => {
+      if (!cancelled) {
+        handledHighlightRequests.current.add(requestKey);
+        setError(getUserFriendlyErrorMessage(err, 'Unable to load this produce item.'));
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [
+    targetProduceId,
+    farmerId,
+    farmer,
+    loadedFarmerId,
+    searchParams,
+    setSearchParams,
+  ]);
+
+  useEffect(() => {
+    if (!highlightedProduceId) return undefined;
+
+    const frameId = window.requestAnimationFrame(() => {
+      document
+        .getElementById(`farmer-produce-${highlightedProduceId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    const timeoutId = window.setTimeout(
+      () => setHighlightedProduceId(''),
+      2000,
+    );
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [highlightedProduceId]);
+
   const avatar = avatarStyles[farmer?.avatarStyle] || avatarStyles.neutral;
 
   return (
@@ -108,29 +292,13 @@ function FarmerPage() {
           {produce.length ? (
             <div className="farmer-detail-produce-list">
               {produce.map((item) => (
-                <article key={item._id} className={`farmer-produce-item${item.status === 'sold_out' ? ' sold-out' : ''}`}>
-                  <div className="marketplace-produce-image">
-                    <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
-                    {item.imageUrl && (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        loading="lazy"
-                        onError={(event) => event.currentTarget.remove()}
-                      />
-                    )}
-                  </div>
-                  <div className="farmer-product-name-block">
-                    <span className="farmer-produce-category">{item.category}</span>
-                    <h3>{item.name}</h3>
-                    <span className="farmer-produce-location">{item.location}</span>
-                  </div>
-                  <div className="farmer-produce-meta">
-                    <span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span>
-                    <span>{item.quantity} {item.unit || 'unit'}</span>
-                    <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
-                  </div>
-                </article>
+                <FarmerProduceItem
+                  key={item._id}
+                  item={item}
+                  farmerId={farmerId}
+                  farmName={farmer.farmName}
+                  highlightedProduceId={highlightedProduceId}
+                />
               ))}
             </div>
           ) : (

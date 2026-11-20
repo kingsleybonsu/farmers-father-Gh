@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
 
@@ -27,6 +27,7 @@ function Marketplace({ setSuggestions, setActiveSuggestion, setSuggestionsDismis
   const [error, setError] = useState('');
   const requestId = useRef(0);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const searchTerm = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -181,31 +182,60 @@ function Marketplace({ setSuggestions, setActiveSuggestion, setSuggestionsDismis
                 </Link>
 
                 <div className="farmer-produce-list">
-                  {farmer.items.map((item) => (
-                    <div key={item._id} className={`farmer-produce-item${item.status === 'sold_out' ? ' sold-out' : ''}`}>
-                      <div className="marketplace-produce-image">
-                        <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
-                        {item.imageUrl && (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            loading="lazy"
-                            onError={(event) => event.currentTarget.remove()}
-                          />
-                        )}
+                  {farmer.items.map((item) => {
+                    const status = item.status || 'available';
+                    const unavailable = status === 'sold_out' || status === 'coming_soon';
+
+                    return (
+                      <div key={item._id} className={`farmer-produce-item${status === 'sold_out' ? ' sold-out' : ''}`}>
+                        <div className="marketplace-produce-image">
+                          <span className="marketplace-image-fallback" aria-hidden="true">🌾</span>
+                          {item.imageUrl && (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              loading="lazy"
+                              onError={(event) => event.currentTarget.remove()}
+                            />
+                          )}
+                        </div>
+                        <div className="farmer-product-name-block">
+                          <span className="farmer-produce-category">{item.category}</span>
+                          <h3>{item.name}</h3>
+                          <span className="farmer-produce-location">{item.location}</span>
+                        </div>
+                        <div className="farmer-produce-meta">
+                          <span className={`produce-status-badge ${status}`}>{produceStatusLabels[status] || produceStatusLabels.available}</span>
+                          <span>{item.quantity} {item.unit || 'unit'}</span>
+                          <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
+                        </div>
+                        <button
+                          className={`marketplace-add-button${unavailable ? ' unavailable' : ''}`}
+                          type="button"
+                          aria-label={unavailable ? produceStatusLabels[status] : `Add ${item.name} to cart`}
+                          disabled={unavailable}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            navigate(`/farmers/${farmer.id}?produce=${encodeURIComponent(item._id)}`);
+                          }}
+                        >
+                          {unavailable ? (
+                            <span className="marketplace-add-label">{produceStatusLabels[status]}</span>
+                          ) : (
+                            <>
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6" />
+                                <circle cx="10" cy="20" r="1.2" />
+                                <circle cx="18" cy="20" r="1.2" />
+                              </svg>
+                              <span className="marketplace-add-label">Add to cart</span>
+                            </>
+                          )}
+                        </button>
                       </div>
-                      <div className="farmer-product-name-block">
-                        <span className="farmer-produce-category">{item.category}</span>
-                        <h3>{item.name}</h3>
-                        <span className="farmer-produce-location">{item.location}</span>
-                      </div>
-                      <div className="farmer-produce-meta">
-                        <span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span>
-                        <span>{item.quantity} {item.unit || 'unit'}</span>
-                        <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {farmer.totalProduce > farmer.items.length && (
                   <Link className="farmer-more-link" to={`/farmers/${farmer.id}`}>
