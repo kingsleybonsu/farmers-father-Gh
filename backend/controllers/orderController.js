@@ -165,7 +165,8 @@ exports.createOrders = async (req, res, next) => {
         ordersByFarmer.set(farmerId, farmerOrder);
       }
 
-      const lineTotal = produce.price * requested.quantity;
+      const lineTotal =
+        Math.round(produce.price * requested.quantity * 100) / 100;
       farmerOrder.items.push({
         produce: produce._id,
         name: produce.name,
@@ -174,7 +175,8 @@ exports.createOrders = async (req, res, next) => {
         quantity: requested.quantity,
         lineTotal,
       });
-      farmerOrder.total += lineTotal;
+      farmerOrder.total =
+        Math.round((farmerOrder.total + lineTotal) * 100) / 100;
     }
 
     const checkoutGroupId = crypto.randomUUID();

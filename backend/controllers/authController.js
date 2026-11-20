@@ -10,13 +10,32 @@ const generateToken = (farmerId) => {
 
 exports.registerFarmer = async (req, res, next) => {
   try {
-    const { name, farmName, phone, email, password, avatarStyle } = req.body;
-    if (typeof password !== "string" || password.length < 8) {
+    const { name, farmName, phone, email, password, avatarStyle } =
+      req.body || {};
+    if (typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({ message: "Name is required." });
+    }
+    if (typeof farmName !== "string" || !farmName.trim()) {
+      return res.status(400).json({ message: "Farm name is required." });
+    }
+    if (typeof phone !== "string" || !phone.trim()) {
+      return res.status(400).json({ message: "Phone is required." });
+    }
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+    if (typeof password !== "string" || !password) {
+      return res.status(400).json({ message: "Password is required." });
+    }
+    if (password.length < 8) {
       return res.status(400).json({
         message: "Password must be at least 8 characters long.",
       });
     }
 
+    const normalizedName = name.trim();
+    const normalizedFarmName = farmName.trim();
+    const normalizedPhone = phone.trim();
     const normalizedEmail = email.trim().toLowerCase();
 
     const existingFarmer = await Farmer.findOne({ email: normalizedEmail });
@@ -25,9 +44,9 @@ exports.registerFarmer = async (req, res, next) => {
     }
 
     const farmer = await Farmer.create({
-      name,
-      farmName,
-      phone,
+      name: normalizedName,
+      farmName: normalizedFarmName,
+      phone: normalizedPhone,
       email: normalizedEmail,
       password,
       avatarStyle: avatarStyle || "neutral",
@@ -48,7 +67,14 @@ exports.registerFarmer = async (req, res, next) => {
 
 exports.loginFarmer = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+    if (typeof password !== "string" || !password) {
+      return res.status(400).json({ message: "Password is required." });
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
     const farmer = await Farmer.findOne({ email: normalizedEmail });
 
