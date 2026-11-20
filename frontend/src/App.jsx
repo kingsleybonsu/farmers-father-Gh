@@ -16,6 +16,7 @@ import Settings from './pages/Settings.jsx';
 import Cart from './pages/Cart.jsx';
 import OrderSuccess from './pages/OrderSuccess.jsx';
 import MyOrders from './pages/MyOrders.jsx';
+import FarmerRequests from './pages/FarmerRequests.jsx';
 import { clearStoredSession, SESSION_EXPIRED_EVENT } from './api/axios.js';
 import {
   BUYER_SESSION_EXPIRED_EVENT,
@@ -225,6 +226,15 @@ function App({ initialSession, initialBuyerSession }) {
             element={
              <PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}>
                 <SellProduce />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/requests"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated} sessionExpired={sessionExpired}>
+                <FarmerRequests />
               </PrivateRoute>
             }
           />

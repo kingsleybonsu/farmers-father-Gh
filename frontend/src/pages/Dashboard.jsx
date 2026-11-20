@@ -41,6 +41,7 @@ function Dashboard() {
   const [replacementPreview, setReplacementPreview] = useState('');
   const [imageError, setImageError] = useState('');
   const [imageSavingId, setImageSavingId] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState(null);
   const imageInputRef = useRef(null);
   const imageSubmissionLockRef = useRef(false);
   const farmerName = localStorage.getItem('farmerName') || 'Farmer';
@@ -58,6 +59,23 @@ function Dashboard() {
       }
     };
     fetchMyProduce();
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    api.get('/orders/farmer', { params: { status: 'pending', page: 1 } })
+      .then((response) => {
+        if (active && Number.isFinite(response.data.totalOrders)) {
+          setPendingRequests(response.data.totalOrders);
+        }
+      })
+      .catch(() => {
+        if (active) setPendingRequests(null);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -210,6 +228,10 @@ function Dashboard() {
         <div className="stat-card"><span>Total listings</span><strong>{produce.length}</strong></div>
         <div className="stat-card"><span>Total quantity</span><strong className="stat-quantity-total">{quantitySummary || '0'}</strong></div>
         <div className="stat-card"><span>Estimated value</span><strong>₵{estimatedValue.toFixed(2)}</strong></div>
+        <Link className="stat-card dashboard-pending-stat" to="/requests">
+          <span>Pending requests</span>
+          <strong>{pendingRequests === null ? '—' : pendingRequests}</strong>
+        </Link>
       </div>
       {error && <div className="form-error">{error}</div>}
       {message && <div className="form-success">{message}</div>}
