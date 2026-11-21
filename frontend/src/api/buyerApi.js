@@ -66,7 +66,9 @@ export function getStoredBuyerSession() {
 }
 
 const buyerApi = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : '/api',
 });
 
 buyerApi.interceptors.request.use((config) => {

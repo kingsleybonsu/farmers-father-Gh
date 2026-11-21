@@ -1,9 +1,10 @@
-// 1. Force the Node.js process to use Google's Public DNS servers.
-// This forces your mobile hotspot to resolve MongoDB's SRV/TXT records safely.
+// Optionally use Google's Public DNS servers for MongoDB SRV/TXT resolution.
 const dns = require("dns");
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
 require("dotenv").config();
+if (process.env.USE_GOOGLE_DNS === "true") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -12,7 +13,6 @@ const authRoutes = require("./routes/authRoutes");
 const buyerRoutes = require("./routes/buyerRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const produceRoutes = require("./routes/produceRoutes");
-
 const app = express();
 
 // Trust reverse proxy (Vite dev proxy, Render, Heroku)
