@@ -18,6 +18,7 @@ const app = express();
 // Trust reverse proxy (Vite dev proxy, Render, Heroku)
 app.set("trust proxy", 1);
 
+
 // Security Headers
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
