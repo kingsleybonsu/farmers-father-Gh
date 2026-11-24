@@ -756,6 +756,11 @@ button {
   margin-top: 0.25rem;
   color: var(--text-muted);
   font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.produce-row-description {
+  min-width: 0;
 }
 
 .stock-badge {
@@ -814,7 +819,8 @@ button {
 
 .row-price {
   color: var(--primary);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .row-actions {
@@ -926,6 +932,13 @@ button {
   width: 100%;
   padding: 0.65rem 0.75rem;
   border-radius: 0.55rem;
+}
+
+.unit-field-help {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 .inline-name {
@@ -3406,6 +3419,7 @@ select:disabled {
 
   .row-price {
     justify-self: start;
+    text-align: left;
   }
 
   .row-actions {

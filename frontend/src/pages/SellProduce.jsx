@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
+import { getUnitsForCategory } from '../constants.js';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const permittedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
@@ -13,7 +14,7 @@ function SellProduce() {
     category: 'Fruits',
     status: 'available',
     quantity: '',
-    unit: '',
+    unit: getUnitsForCategory('Fruits')[0],
     price: '',
     location: '',
   });
@@ -37,7 +38,18 @@ function SellProduce() {
   }, [imageFile]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((current) => {
+      if (name === 'category') {
+        const units = getUnitsForCategory(value);
+        return {
+          ...current,
+          category: value,
+          unit: units.includes(current.unit) ? current.unit : units[0] || '',
+        };
+      }
+      return { ...current, [name]: value };
+    });
   };
 
   const handleImageChange = (event) => {
@@ -87,7 +99,7 @@ function SellProduce() {
 
       await api.post('/produce', listing);
       setMessage('Produce listed successfully.');
-      setFormData({ name: '', category: 'Fruits', status: 'available', quantity: '', unit: '', price: '', location: '' });
+      setFormData({ name: '', category: 'Fruits', status: 'available', quantity: '', unit: getUnitsForCategory('Fruits')[0], price: '', location: '' });
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       navigate('/dashboard');
@@ -126,7 +138,7 @@ function SellProduce() {
           </select>
         </label>
         <label>
-          Quantity
+          Quantity available ({formData.unit})
           <input
             name="quantity"
             type="number"
@@ -138,17 +150,22 @@ function SellProduce() {
         </label>
         <label>
           Unit of measurement
-          <input
+          <select
             name="unit"
             value={formData.unit}
             onChange={handleChange}
-            placeholder="e.g. kg, basket, bag, crate, animal"
-            maxLength={30}
             required
-          />
+          >
+            {getUnitsForCategory(formData.category).map((unit) => (
+              <option key={unit} value={unit}>{unit}</option>
+            ))}
+          </select>
+          <small className="unit-field-help">
+            How do you sell it? Quantity and price both use this unit.
+          </small>
         </label>
         <label>
-          Price per unit
+          Price per {formData.unit}
           <input
             name="price"
             type="number"

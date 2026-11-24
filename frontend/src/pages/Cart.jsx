@@ -129,7 +129,7 @@ function Cart({ isAuthenticated, isBuyerAuthenticated, onFarmerLogout }) {
                   </div>
                   <div className="cart-item-details">
                     <h3>{item.name}</h3>
-                    <span>₵{item.unitPrice.toFixed(2)} / {item.unit}</span>
+                    <span>₵{item.unitPrice.toFixed(2)} per {item.unit}</span>
                   </div>
                   <div className="cart-item-actions">
                     <div className="quantity-stepper" aria-label={`Quantity for ${item.name}`}>

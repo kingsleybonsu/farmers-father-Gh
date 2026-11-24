@@ -1,6 +1,7 @@
 const Produce = require("../models/Produce");
 const Farmer = require("../models/Farmer");
 const mongoose = require("mongoose");
+const { isAllowedUnit } = require("../constants/units");
 const {
   cloudinary,
   isCloudinaryConfigured,
@@ -67,6 +68,13 @@ exports.createProduce = async (req, res, next) => {
   try {
     const { name, category, status, quantity, unit, price, location } =
       req.body;
+    const normalizedUnit = typeof unit === "string" ? unit.trim() : "";
+    if (!isAllowedUnit(category, normalizedUnit)) {
+      return res.status(400).json({
+        message: "Please choose a valid unit for this category.",
+      });
+    }
+
     let imageUrl = "";
     let imagePublicId = "";
 
@@ -100,7 +108,7 @@ exports.createProduce = async (req, res, next) => {
       category,
       status: status || "available",
       quantity,
-      unit,
+      unit: normalizedUnit,
       price,
       location,
       imageUrl,
@@ -390,6 +398,25 @@ exports.updateProduce = async (req, res, next) => {
 
     const { name, category, status, quantity, unit, price, location } =
       req.body;
+    const existingProduce = await Produce.findOne({
+      _id: req.params.id,
+      farmer: req.farmer._id,
+    });
+
+    if (!existingProduce) {
+      return res.status(404).json({ message: "Produce listing not found." });
+    }
+
+    const normalizedUnit = typeof unit === "string" ? unit.trim() : "";
+    if (
+      !isAllowedUnit(category, normalizedUnit) &&
+      normalizedUnit !== existingProduce.unit
+    ) {
+      return res.status(400).json({
+        message: "Please choose a valid unit for this category.",
+      });
+    }
+
     const produce = await Produce.findOneAndUpdate(
       { _id: req.params.id, farmer: req.farmer._id },
       {
@@ -397,7 +424,7 @@ exports.updateProduce = async (req, res, next) => {
         category,
         status: status || "available",
         quantity,
-        unit,
+        unit: normalizedUnit,
         price,
         location,
       },

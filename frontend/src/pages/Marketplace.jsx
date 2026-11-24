@@ -206,8 +206,8 @@ function Marketplace({ setSuggestions, setActiveSuggestion, setSuggestionsDismis
                         </div>
                         <div className="farmer-produce-meta">
                           <span className={`produce-status-badge ${status}`}>{produceStatusLabels[status] || produceStatusLabels.available}</span>
-                          <span>{item.quantity} {item.unit || 'unit'}</span>
-                          <strong>₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
+                          <span>{item.quantity} {item.unit || 'unit'} available</span>
+                          <strong>₵{Number(item.price).toFixed(2)} per {item.unit || 'unit'}</strong>
                         </div>
                         <button
                           className={`marketplace-add-button${unavailable ? ' unavailable' : ''}`}

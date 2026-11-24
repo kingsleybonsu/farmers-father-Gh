@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios.js';
 import { getUserFriendlyErrorMessage } from '../api/errorMessage.js';
+import { getUnitsForCategory } from '../constants.js';
 
 const avatarStyles = {
   male: { symbol: '👨‍🌾', color: '#d9f0ff' },
@@ -102,7 +103,18 @@ function Dashboard() {
   };
 
   const handleDraftChange = (event) => {
-    setDraft({ ...draft, [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    setDraft((current) => {
+      if (name === 'category') {
+        const units = getUnitsForCategory(value);
+        return {
+          ...current,
+          category: value,
+          unit: units.includes(current.unit) ? current.unit : units[0] || '',
+        };
+      }
+      return { ...current, [name]: value };
+    });
   };
 
   const saveChanges = async (id) => {
@@ -266,16 +278,26 @@ function Dashboard() {
               <div className="produce-row-title"><div className="produce-icon">✿</div><div><input className="inline-name" name="name" value={draft.name} onChange={handleDraftChange} maxLength={30} required /><span className="stock-badge">Editing</span></div></div>
               <label>Category<select name="category" value={draft.category} onChange={handleDraftChange}><option>Fruits</option><option>Vegetables</option><option>Grains</option><option>Tubers</option><option>Livestock</option></select></label>
               <label>Availability<select name="status" value={draft.status} onChange={handleDraftChange}><option value="available">Available</option><option value="sold_out">Sold out</option><option value="coming_soon">Coming soon</option></select></label>
-              <label>Quantity<input name="quantity" type="number" min="1" value={draft.quantity} onChange={handleDraftChange} required /></label>
-              <label>Unit<input name="unit" value={draft.unit} onChange={handleDraftChange} maxLength={30} required /></label>
-              <label>Price (₵)<input name="price" type="number" min="0" step="0.01" value={draft.price} onChange={handleDraftChange} required /></label>
+              <label>Quantity available ({draft.unit})<input name="quantity" type="number" min="1" value={draft.quantity} onChange={handleDraftChange} required /></label>
+              <label>Unit of measurement
+                <select name="unit" value={draft.unit} onChange={handleDraftChange} required>
+                  {!getUnitsForCategory(draft.category).includes(draft.unit) && (
+                    <option value={draft.unit}>{draft.unit} (current)</option>
+                  )}
+                  {getUnitsForCategory(draft.category).map((unit) => (
+                    <option key={unit} value={unit}>{unit}</option>
+                  ))}
+                </select>
+                <small className="unit-field-help">How do you sell it? Quantity and price both use this unit.</small>
+              </label>
+              <label>Price per {draft.unit}<input name="price" type="number" min="0" step="0.01" value={draft.price} onChange={handleDraftChange} required /></label>
               <label>Location<input name="location" value={draft.location} onChange={handleDraftChange} maxLength={40} required /></label>
               <div className="row-actions"><button type="button" className="secondary-button compact-button" onClick={cancelEditing}>Undo</button><button type="submit" className="primary-button compact-button" disabled={savingId === item._id}>{savingId === item._id ? 'Saving...' : 'Save changes'}</button></div>
             </form>
           ) : (
             <article key={item._id} className="produce-row">
-              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} {item.unit || 'unit'}</p></div><div className="produce-row-badges"><span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div></div>
-              <strong className="row-price">₵{Number(item.price).toFixed(2)} / {item.unit || 'unit'}</strong>
+              <div className="produce-row-title"><div className="produce-icon marketplace-produce-image"><span className="marketplace-image-fallback" aria-hidden="true">✿</span>{item.imageUrl && <img src={item.imageUrl} alt={item.name} loading="lazy" onError={(event) => event.currentTarget.remove()} />}</div><div className="produce-row-description"><h3>{item.name}</h3><p>{item.category} · {item.location} · {item.quantity} {item.unit || 'unit'} available</p></div><div className="produce-row-badges"><span className={`produce-status-badge ${item.status || 'available'}`}>{produceStatusLabels[item.status] || produceStatusLabels.available}</span><span className={`stock-badge ${Number(item.quantity) < 50 ? 'low-stock' : ''}`}>{Number(item.quantity) < 50 ? 'Low stock' : 'In stock'}</span></div></div>
+              <strong className="row-price">₵{Number(item.price).toFixed(2)} per {item.unit || 'unit'}</strong>
               <div className="row-actions"><button type="button" className="icon-button" onClick={() => startEditing(item)} aria-label={`Edit ${item.name}`}>Edit</button><button type="button" className="icon-button" onClick={() => openImageEditor(item)} aria-label={`Change image for ${item.name}`}>Edit image</button><button type="button" className="icon-button delete-button" onClick={() => deleteListing(item._id)} disabled={deletingId === item._id} aria-label={`Delete ${item.name}`}>{deletingId === item._id ? '...' : 'Delete'}</button></div>
             </article>
           ))
