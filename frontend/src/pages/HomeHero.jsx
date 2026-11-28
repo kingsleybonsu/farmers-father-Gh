@@ -25,7 +25,7 @@ function HomeHero({ isAuthenticated }) {
             </Link>
           ) : (
             <Link className="primary-button hero-button" to="/register">
-              Become a Farmer
+              REGISTER
             </Link>
           )}
           <a
@@ -36,7 +36,7 @@ function HomeHero({ isAuthenticated }) {
             View Available Produce
           </a>
         </div>
-      </div>
+      </div> 
     </section>
   );
 }

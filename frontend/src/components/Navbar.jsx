@@ -287,7 +287,7 @@ function Navbar({
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             <Link className="nav-link" to="/login">Login</Link>
-            <Link className="nav-button nav-auth-button" to="/register">Become a farmer</Link>
+            <Link className="nav-button nav-auth-button" to="/register">Register</Link>
           </>
         )}
       </nav>
